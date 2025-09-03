@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Tabla de Asistencia - Grupo Aéreo N°8</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --primary-light: #283593;
+            --secondary-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --success-bg: #d4edda;
+            --success-text: #155724;
+            --error-bg: #f8d7da;
+            --error-text: #721c24;
+            --warning-bg: #fff3cd;
+            --warning-text: #856404;
+            --info-bg: #d1ecf1;
+            --info-text: #0c5460;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.5;
+            font-size: 14px;
+            touch-action: manipulation;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #3949ab;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+        }
+
+        .logo {
+            max-height: 80px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .title-container {
+            flex: 2;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .date-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+            flex: 2;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--dark-color);
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        input[type="date"], input[type="text"], select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+            min-height: 40px;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to bottom, var(--primary-light), var(--primary-color));
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(to bottom, var(--secondary-color), #45a049);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(to bottom, var(--info-color), #0b7dda);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(to bottom, var(--warning-color), #e68a00);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(to bottom, var(--danger-color), #d32f2f);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to bottom, #9e9e9e, #757575);
+            color: white;
+        }
+
+        button:active {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            transform: translateY(2px);
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button i {
+            font-size: 16px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 13px;
+            min-width: 60px;
+        }
+
+        th {
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            font-weight: bold;
+            color: var(--dark-color);
+            position: sticky;
+            top: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 13px;
+        }
+
+        .editable {
+            background-color: #ffebee;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .editable:focus {
+            background-color: #ffcdd2;
+            outline: 2px solid var(--danger-color);
+        }
+
+        .result {
+            background-color: #ede7f6;
+            font-weight: bold;
+            color: var(--dark-color);
+            font-size: 13px;
+        }
+
+        .fixed {
+            background-color: #f5f5f5;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .available {
+            background-color: #e8f5e9;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #999;
+            border-radius: 4px;
+        }
+
+        .message {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .success {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid #f5c6cb;
+        }
+
+        .warning {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            border: 1px solid #ffeaa7;
+        }
+
+        .info {
+            background-color: var(--info-bg);
+            color: var(--info-text);
+            border: 1px solid #bee5eb;
+        }
+
+        .instructions {
+            background-color: #e8f5e9;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            border-left: 4px solid var(--secondary-color);
+            display: none; /* Oculto por defecto */
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #2e7d32;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .instructions ol {
+            margin-bottom: 0;
+            padding-left: 18px;
+        }
+
+        .instructions li {
+            margin-bottom: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .new-record-indicator {
+            background-color: var(--info-bg);
+            color: var(--info-text);
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+            font-weight: bold;
+        }
+
+        .summary-panel {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .summary-panel h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .search-box {
+            margin: 15px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            min-height: auto;
+        }
+
+        /* Media queries para responsividad */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .date-control {
+                flex-direction: column;
+                align-items: stretch;
+                min-width: auto;
+            }
+            
+            .buttons {
+                justify-content: center;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .buttons {
+                gap: 6px;
+            }
+            
+            button {
+                min-width: 100px;
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <img src="logofap.jpg" alt="Logo FAP" class="logo">
+        </div>
+        <div class="title-container">
+            <h1>PARTE PERSONAL GRUPO AEREO N°8</h1>
+            <p>Sistema de Registro y Control de Asistencia</p>
+            <p>Create for Afusum</p>
+        </div>
+        <div class="logo-container">
+            <!-- Espacio reservado para logo adicional si es necesario -->
+        </div>
+    </div>
+
+    <div id="instructions" class="instructions">
+        <h3><i class="fas fa-info-circle"></i> Instrucciones de Uso</h3>
+        <ol>
+            <li>Seleccione la fecha para la cual desea registrar la asistencia</li>
+            <li>Complete los datos en las celdas de color <span style="color:#ff6d6a;">rosa (descuentos)</span></li>
+            <li>Haga clic en "Guardar Datos" para almacenar la información</li>
+            <li>Use "Exportar a Excel" para descargar un reporte</li>
+            <li>Use "Ver Registros" para consultar datos históricos</li>
+            <li>Use "Importar desde Excel" para cargar datos desde un archivo</li>
+            <li>Use "Nuevo Registro" para limpiar los campos y comenzar uno nuevo</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <div class="controls">
+            <div class="date-control">
+                <label for="fecha"><i class="fas fa-calendar-alt"></i> Seleccione una fecha:</label>
+                <input type="date" id="fecha" name="fecha">
+            </div>
+            <div class="buttons">
+                <button id="btnHelp" class="btn-info"><i class="fas fa-question-circle"></i> Ayuda</button>
+                <button id="btnNew" class="btn-info"><i class="fas fa-plus"></i> Nuevo Registro</button>
+                <button id="btnLoad" class="btn-primary"><i class="fas fa-download"></i> Cargar</button>
+                <button id="btnSave" class="btn-success"><i class="fas fa-save"></i> Guardar</button>
+                <button id="btnExport" class="btn-info"><i class="fas fa-file-export"></i> Exportar</button>
+                <button id="btnView" class="btn-warning"><i class="fas fa-history"></i> Ver Registros</button>
+                <div class="file-input-container">
+                    <button id="btnImport" class="btn-secondary"><i class="fas fa-file-import"></i> Importar</button>
+                    <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="message" class="message"></div>
+    <div id="newRecordIndicator" class="new-record-indicator">
+        <i class="fas fa-exclamation-circle"></i> Está creando un nuevo registro. Complete los campos en rosa.
+    </div>
+
+    <div class="table-container">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>TSP</th>
+                    <th>TIP</th>
+                    <th>TC1</th>
+                    <th>TC2</th>
+                    <th>TC3</th>
+                    <th>S01</th>
+                    <th>S02</th>
+                    <th>S03</th>
+                    <th>TMI</th>
+                    <th>PCA</th>
+                    <th>PCB</th>
+                    <th>TCI</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <!-- Primera fila (Datos automáticos) -->
+                    <td class="fixed">3</td>
+                    <td class="fixed">23</td>
+                    <td class="fixed">22</td>
+                    <td class="fixed">32</td>
+                    <td class="fixed">21</td>
+                    <td class="fixed">24</td>
+                    <td class="fixed">24</td>
+                    <td class="fixed">56</td>
+                    <td class="fixed">205</td>
+                    <td class="fixed">43</td>
+                    <td class="fixed">99</td>
+                    <td class="fixed">142</td>
+                </tr>
+                <tr>
+                    <!-- Segunda fila (Datos manuales) -->
+                    <td class="editable" contenteditable="true" data-field="tsp" data-max="3"></td>
+                    <td class="editable" contenteditable="true" data-field="tip" data-max="23"></td>
+                    <td class="editable" contenteditable="true" data-field="tc1" data-max="22"></td>
+                    <td class="editable" contenteditable="true" data-field="tc2" data-max="32"></td>
+                    <td class="editable" contenteditable="true" data-field="tc3" data-max="21"></td>
+                    <td class="editable" contenteditable="true" data-field="s01" data-max="24"></td>
+                    <td class="editable" contenteditable="true" data-field="s02" data-max="24"></td>
+                    <td class="editable" contenteditable="true" data-field="s03" data-max="56"></td>
+                    <td id="sum" class="result">0</td>
+                    <td class="editable" contenteditable="true" data-field="pca" data-max="43"></td>
+                    <td class="editable" contenteditable="true" data-field="pcb" data-max="99"></td>
+                    <td id="totalSum" class="result">0</td>
+                </tr>
+                <tr>
+                    <!-- Tercera fila (Resta) -->
+                    <td id="resta1" class="available">3</td>
+                    <td id="resta2" class="available">23</td>
+                    <td id="resta3" class="available">22</td>
+                    <td id="resta4" class="available">32</td>
+                    <td id="resta5" class="available">21</td>
+                    <td id="resta6" class="available">24</td>
+                    <td id="resta7" class="available">24</td>
+                    <td id="resta8" class="available">56</td>
+                    <td id="resta9" class="available">205</td>
+                    <td id="resta10" class="available">43</td>
+                    <td id="resta11" class="available">99</td>
+                    <td id="resta12" class="available">142</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: white;"></div>
+            <span>Efectivos</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #ffebee;"></div>
+            <span>Descuentos (editables)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #ede7f6;"></div>
+            <span>Total (calculado)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #e8f5e9;"></div>
+            <span>Disponible (calculado)</span>
+        </div>
+    </div>
+
+    <!-- Panel de resumen de registros -->
+    <div id="summaryPanel" class="card summary-panel">
+        <h3><i class="fas fa-history"></i> Resumen de Registros</h3>
+        <input type="text" id="searchInput" class="search-box" placeholder="Buscar por fecha...">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>TSP</th>
+                        <th>TIP</th>
+                        <th>TC1</th>
+                        <th>TC2</th>
+                        <th>TC3</th>
+                        <th>S01</th>
+                        <th>S02</th>
+                        <th>S03</th>
+                        <th>TMI</th>
+                        <th>PCA</th>
+                        <th>PCB</th>
+                        <th>TCI</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryBody">
+                    <!-- Los registros se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Almacenamiento local para los registros
+        const STORAGE_KEY = 'asistencia_grupo_aereo';
+        let registros = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let hasUnsavedChanges = false;
+        let isNewRecord = false;
+        let isSummaryVisible = false; // Variable para controlar si el panel de resumen está visible
+
+        // Elementos DOM
+        const fechaInput = document.getElementById('fecha');
+        const btnHelp = document.getElementById('btnHelp');
+        const btnNew = document.getElementById('btnNew');
+        const btnLoad = document.getElementById('btnLoad');
+        const btnSave = document.getElementById('btnSave');
+        const btnExport = document.getElementById('btnExport');
+        const btnView = document.getElementById('btnView');
+        const btnImport = document.getElementById('btnImport');
+        const fileInput = document.getElementById('fileInput');
+        const messageDiv = document.getElementById('message');
+        const newRecordIndicator = document.getElementById('newRecordIndicator');
+        const instructionsDiv = document.getElementById('instructions');
+        const summaryPanel = document.getElementById('summaryPanel');
+        const summaryBody = document.getElementById('summaryBody');
+        const searchInput = document.getElementById('searchInput');
+
+        // Establecer fecha actual por defecto
+        fechaInput.valueAsDate = new Date();
+
+        // Función para mostrar/ocultar instrucciones
+        function toggleInstructions() {
+            if (instructionsDiv.style.display === 'block') {
+                instructionsDiv.style.display = 'none';
+                btnHelp.innerHTML = '<i class="fas fa-question-circle"></i> Ayuda';
+            } else {
+                instructionsDiv.style.display = 'block';
+                btnHelp.innerHTML = '<i class="fas fa-times"></i> Ocultar Ayuda';
+            }
+        }
+
+        // Función para mostrar/ocultar el panel de resumen
+        function toggleSummaryPanel() {
+            if (isSummaryVisible) {
+                // Ocultar el panel
+                summaryPanel.style.display = 'none';
+                isSummaryVisible = false;
+                btnView.innerHTML = '<i class="fas fa-history"></i> Ver Registros';
+            } else {
+                // Mostrar el panel
+                mostrarRegistros();
+                isSummaryVisible = true;
+                btnView.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar Registros';
+            }
+        }
+
+        // Función para mostrar mensajes
+        function showMessage(text, type = 'success') {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Función para limpiar todos los campos editables
+        function limpiarCampos() {
+            const editableCells = document.querySelectorAll('td[contenteditable="true"]');
+            editableCells.forEach(cell => {
+                cell.textContent = '';
+            });
+            
+            // Actualizar cálculos
+            actualizarCalculos();
+            
+            // Indicar que es un nuevo registro
+            isNewRecord = true;
+            newRecordIndicator.style.display = 'block';
+            hasUnsavedChanges = false;
+            
+            showMessage('Campos listos para nuevo registro. Complete la información requerida.', 'info');
+        }
+
+        // Validar si ya existe registro para la fecha seleccionada
+        function existeRegistro(fecha) {
+            return registros.some(reg => reg.fecha === fecha);
+        }
+
+        // Obtener registro por fecha
+        function obtenerRegistroPorFecha(fecha) {
+            return registros.find(reg => reg.fecha === fecha);
+        }
+
+        // Obtener datos de la tabla
+        function obtenerDatosTabla() {
+            const editableCells = document.querySelectorAll('td[contenteditable="true"]');
+            const datos = {};
+
+            editableCells.forEach(cell => {
+                const field = cell.getAttribute('data-field');
+                datos[field] = cell.textContent.trim() || '0';
+            });
+
+            // Calcular TMI (suma de las primeras 8 columnas)
+            datos.tmi = (
+                parseInt(datos.tsp || 0) +
+                parseInt(datos.tip || 0) +
+                parseInt(datos.tc1 || 0) +
+                parseInt(datos.tc2 || 0) +
+                parseInt(datos.tc3 || 0) +
+                parseInt(datos.s01 || 0) +
+                parseInt(datos.s02 || 0) +
+                parseInt(datos.s03 || 0)
+            ).toString();
+
+            // Calcular TCI (suma de PCA y PCB)
+            datos.tci = (
+                parseInt(datos.pca || 0) +
+                parseInt(datos.pcb || 0)
+            ).toString();
+
+            return datos;
+        }
+
+        // Cargar datos a la tabla
+        function cargarDatosATabla(datos) {
+            const editableCells = document.querySelectorAll('td[contenteditable="true"]');
+
+            editableCells.forEach(cell => {
+                const field = cell.getAttribute('data-field');
+                cell.textContent = datos[field] || '';
+            });
+
+            // Actualizar campos calculados
+            actualizarCalculos();
+            hasUnsavedChanges = false;
+            isNewRecord = false;
+            newRecordIndicator.style.display = 'none';
+        }
+
+        // Actualizar todos los cálculos
+        function actualizarCalculos() {
+            const row2 = Array.from(document.querySelectorAll('tbody tr:nth-child(1) td'));
+            const row3 = Array.from(document.querySelectorAll('tbody tr:nth-child(2) td'));
+            const row4 = Array.from(document.querySelectorAll('tbody tr:nth-child(3) td'));
+
+            // Calcular la suma de las columnas 1 a 8 de la segunda fila (datos ingresados)
+            let sum = 0;
+            for (let i = 0; i < 8; i++) {
+                sum += parseInt(row3[i].textContent) || 0;
+            }
+            document.getElementById('sum').textContent = sum;
+
+            // Sumar las columnas 10 y 11 de la segunda fila (PCA y PCB)
+            const col10 = parseInt(row3[9].textContent) || 0;
+            const col11 = parseInt(row3[10].textContent) || 0;
+            document.getElementById('totalSum').textContent = col10 + col11;
+
+            // Calcular la resta entre la primera y la segunda fila para todas las columnas
+            row2.forEach((cell, index) => {
+                const val1 = parseInt(cell.textContent) || 0;
+                const val2 = parseInt(row3[index].textContent) || 0;
+                const resultado = val1 - val2;
+                row4[index].textContent = resultado >= 0 ? resultado : 0;
+            });
+        }
+
+        // Validar entrada numérica y rangos
+        function validarEntrada(input, maxValue) {
+            let value = input.textContent.trim();
+
+            // Solo permitir números
+            if (!/^\d*$/.test(value)) {
+                input.textContent = value.replace(/[^\d]/g, '');
+                return false;
+            }
+
+            // Validar que no sea mayor al máximo permitido
+            const numValue = parseInt(value || 0);
+            if (maxValue !== undefined && numValue > maxValue) {
+                input.textContent = maxValue;
+                showMessage(`El valor no puede ser mayor a ${maxValue}`, 'warning');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Función para mostrar los registros almacenados
+        function mostrarRegistros() {
+            if (registros.length === 0) {
+                showMessage('No hay registros guardados', 'warning');
+                summaryPanel.style.display = 'none';
+                isSummaryVisible = false;
+                btnView.innerHTML = '<i class="fas fa-history"></i> Ver Registros';
+                return;
+            }
+
+            // Ordenar registros por fecha (más reciente primero)
+            registros.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            // Limpiar tabla de resumen
+            summaryBody.innerHTML = '';
+
+            // Llenar tabla de resumen
+            registros.forEach(registro => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td>${registro.fecha}</td>
+                    <td>${registro.tsp || '0'}</td>
+                    <td>${registro.tip || '0'}</td>
+                    <td>${registro.tc1 || '0'}</td>
+                    <td>${registro.tc2 || '0'}</td>
+                    <td>${registro.tc3 || '0'}</td>
+                    <td>${registro.s01 || '0'}</td>
+                    <td>${registro.s02 || '0'}</td>
+                    <td>${registro.s03 || '0'}</td>
+                    <td>${registro.tmi || '0'}</td>
+                    <td>${registro.pca || '0'}</td>
+                    <td>${registro.pcb || '0'}</td>
+                    <td>${registro.tci || '0'}</td>
+                    <td class="action-buttons">
+                        <button class="btn-primary action-btn" onclick="cargarYSeleccionarFecha('${registro.fecha}')">
+                            <i class="fas fa-download"></i> Cargar
+                        </button>
+                        <button class="btn-danger action-btn" onclick="eliminarRegistro('${registro.fecha}')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+
+                summaryBody.appendChild(row);
+            });
+
+            summaryPanel.style.display = 'block';
+            showMessage(`Se encontraron ${registros.length} registros`, 'success');
+        }
+
+        // Función para cargar y seleccionar fecha (usada en los botones de la tabla)
+        window.cargarYSeleccionarFecha = function(fecha) {
+            fechaInput.value = fecha;
+            const registro = obtenerRegistroPorFecha(fecha);
+            if (registro) {
+                cargarDatosATabla(registro);
+                showMessage(`Registro del ${fecha} cargado correctamente`);
+                summaryPanel.style.display = 'none';
+                isSummaryVisible = false;
+                btnView.innerHTML = '<i class="fas fa-history"></i> Ver Registros';
+            }
+        };
+
+        // Función para eliminar registro (usada en los botones de la tabla)
+        window.eliminarRegistro = function(fecha) {
+            if (confirm(`¿Está seguro de que desea eliminar el registro del ${fecha}?`)) {
+                registros = registros.filter(reg => reg.fecha !== fecha);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+                showMessage(`Registro del ${fecha} eliminado correctamente`, 'success');
+
+                // Si estamos viendo la fecha eliminada, limpiar la tabla
+                if (fechaInput.value === fecha) {
+                    limpiarCampos();
+                }
+
+                // Actualizar la vista si está visible
+                if (summaryPanel.style.display === 'block') {
+                    mostrarRegistros();
+                }
+            }
+        };
+
+        // Búsqueda en registros
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = summaryBody.getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const dateCell = rows[i].getElementsByTagName('td')[0];
+                if (dateCell) {
+                    const dateText = dateCell.textContent.toLowerCase();
+                    if (dateText.includes(searchTerm)) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+
+        // Mostrar/ocultar instrucciones
+        btnHelp.addEventListener('click', function() {
+            toggleInstructions();
+        });
+
+        // Nuevo registro - Limpiar campos
+        btnNew.addEventListener('click', function() {
+            limpiarCampos();
+        });
+
+        // Cargar registro
+        btnLoad.addEventListener('click', function() {
+            const fecha = fechaInput.value;
+
+            if (!fecha) {
+                showMessage('Por favor, seleccione una fecha', 'error');
+                return;
+            }
+
+            if (!existeRegistro(fecha)) {
+                showMessage('No existe registro para esta fecha. Puede crear uno nuevo.', 'info');
+                limpiarCampos();
+                return;
+            }
+
+            const registro = obtenerRegistroPorFecha(fecha);
+            cargarDatosATabla(registro);
+            showMessage('Registro cargado correctamente');
+        });
+
+        // Guardar datos
+        btnSave.addEventListener('click', function() {
+            const fecha = fechaInput.value;
+
+            if (!fecha) {
+                showMessage('Por favor, seleccione una fecha', 'error');
+                return;
+            }
+
+            const datos = obtenerDatosTabla();
+
+            // Validar datos
+            for (const key in datos) {
+                if (key !== 'tmi' && key !== 'tci' && (isNaN(datos[key]) || datos[key] === '')) {
+                    showMessage('Por favor, complete todos los campos con valores numéricos', 'error');
+                    return;
+                }
+            }
+
+            // Validar si ya existe registro para esta fecha
+            if (existeRegistro(fecha)) {
+                if (!confirm('Ya existe un registro para esta fecha. ¿Desea actualizarlo?')) {
+                    return;
+                }
+
+                // Actualizar registro existente
+                const index = registros.findIndex(reg => reg.fecha === fecha);
+                registros[index] = {
+                    fecha,
+                    ...datos,
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                // Crear nuevo registro
+                registros.push({
+                    fecha,
+                    ...datos,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+            showMessage('Registro guardado exitosamente!');
+            hasUnsavedChanges = false;
+            isNewRecord = false;
+            newRecordIndicator.style.display = 'none';
+        });
+
+        // Exportar a Excel
+        btnExport.addEventListener('click', function() {
+            if (registros.length === 0) {
+                showMessage('No hay registros para exportar', 'error');
+                return;
+            }
+
+            try {
+                // Crear workbook y worksheet
+                const ws = XLSX.utils.json_to_sheet(registros);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Asistencia Grupo Aereo");
+
+                // Generar nombre de archivo con fecha
+                const fechaExport = new Date().toISOString().split('T')[0];
+                const filename = `asistencia_grupo_aereo_${fechaExport}.xlsx`;
+
+                // Descargar archivo
+                XLSX.writeFile(wb, filename);
+                showMessage('Excel exportado exitosamente!');
+
+            } catch (error) {
+                showMessage('Error al exportar: ' + error.message, 'error');
+            }
+        });
+
+        // Importar desde Excel
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // Suponiendo que la primera hoja contiene los datos
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData.length > 0) {
+                        // Validar estructura básica
+                        if (!jsonData[0].hasOwnProperty('fecha')) {
+                            showMessage('El archivo no tiene el formato correcto. Debe incluir campo "fecha".', 'error');
+                            return;
+                        }
+
+                        // Combinar con registros existentes (evitando duplicados por fecha)
+                        jsonData.forEach(nuevoReg => {
+                            const index = registros.findIndex(reg => reg.fecha === nuevoReg.fecha);
+                            if (index !== -1) {
+                                registros[index] = nuevoReg;
+                            } else {
+                                registros.push(nuevoReg);
+                            }
+                        });
+
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+                        showMessage(`Datos importados correctamente. Total de registros: ${registros.length}`, 'success');
+                    } else {
+                        showMessage('El archivo no contiene datos válidos', 'error');
+                    }
+                } catch (error) {
+                    showMessage('Error al procesar el archivo: ' + error.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+
+            // Limpiar input file
+            e.target.value = '';
+        });
+
+        // Ver registros - Ahora funciona como toggle
+        btnView.addEventListener('click', function() {
+            toggleSummaryPanel();
+        });
+
+        // Validar en tiempo real si ya existe registro para la fecha
+        fechaInput.addEventListener('change', function() {
+            const fecha = this.value;
+            if (existeRegistro(fecha)) {
+                showMessage('Ya existe registro para esta fecha. Use el botón "Cargar Registro" para visualizarlo.', 'info');
+                newRecordIndicator.style.display = 'none';
+            } else {
+                messageDiv.style.display = 'none';
+                limpiarCampos();
+            }
+        });
+
+        // Validar entrada numérica en celdas editables
+        document.addEventListener('input', function(e) {
+            if (e.target.hasAttribute('contenteditable') && e.target.getAttribute('contenteditable') === 'true') {
+                const maxValue = parseInt(e.target.getAttribute('data-max'));
+                validarEntrada(e.target, maxValue);
+
+                // Actualizar todos los cálculos
+                actualizarCalculos();
+                hasUnsavedChanges = true;
+            }
+        });
+
+        // Advertencia de cambios no guardados
+        window.addEventListener('beforeunload', function(e) {
+            if (hasUnsavedChanges) {
+                const message = 'Tiene cambios sin guardar. ¿Está seguro de que desea salir?';
+                e.returnValue = message;
+                return message;
+            }
+        });
+
+        // Inicializar cálculos al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarCalculos();
+            limpiarCampos();
+
+            // Verificar si hay un registro para la fecha actual
+            const fechaActual = fechaInput.value;
+            if (existeRegistro(fechaActual)) {
+                showMessage('Ya existe un registro para la fecha actual. Use el botón "Cargar Registro" para visualizarlo.', 'info');
+                newRecordIndicator.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
